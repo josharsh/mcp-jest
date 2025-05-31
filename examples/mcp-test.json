@@ -1,0 +1,39 @@
+{
+  "server": {
+    "command": "node",
+    "args": ["examples/demo-server.js"],
+    "env": {
+      "NODE_ENV": "test",
+      "MCP_LOG_LEVEL": "debug"
+    }
+  },
+  "tests": {
+    "tools": {
+      "add": {
+        "args": { "a": 5, "b": 3 },
+        "expect": "content[0].text === '8'"
+      },
+      "search": {
+        "args": { "query": "test search" },
+        "expect": "content && content.length > 0"
+      },
+      "echo": {
+        "args": { "message": "hello world" },
+        "expect": "content[0].text === 'Echo: hello world'"
+      }
+    },
+    "resources": {
+      "greeting://*": {
+        "expect": "count >= 1"
+      }
+    },
+    "prompts": {
+      "review-code": {
+        "args": { "code": "function test() { return 42; }" },
+        "expect": "messages && messages.length > 0"
+      }
+    },
+    "timeout": 30000,
+    "maxRetries": 3
+  }
+}
