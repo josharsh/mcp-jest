@@ -19,6 +19,7 @@ interface CLIOptions {
 
 function parseArgs(args: string[]): CLIOptions {
   const options: CLIOptions = {};
+  const positionalArgs: string[] = [];
   
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -59,10 +60,18 @@ function parseArgs(args: string[]): CLIOptions {
         options.timeout = parseInt(args[++i]) || 30000;
         break;
       default:
-        if (!options.server && !arg.startsWith('-')) {
-          options.server = arg;
+        if (!arg.startsWith('-')) {
+          positionalArgs.push(arg);
         }
         break;
+    }
+  }
+  
+  // Handle positional arguments: first is command, rest are args
+  if (!options.server && positionalArgs.length > 0) {
+    options.server = positionalArgs[0];
+    if (positionalArgs.length > 1) {
+      options.args = positionalArgs.slice(1);
     }
   }
   
@@ -225,9 +234,8 @@ process.on('unhandledRejection', (reason) => {
   process.exit(1);
 });
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((error) => {
-    console.error(`❌ Error: ${error instanceof Error ? error.message : String(error)}`);
-    process.exit(1);
-  });
-}
+// Always run main when this file is executed
+main().catch((error) => {
+  console.error(`❌ Error: ${error instanceof Error ? error.message : String(error)}`);
+  process.exit(1);
+});
