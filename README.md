@@ -164,7 +164,7 @@ We love contributions! Here's how to get started:
 ### Quick Development Setup
 
 ```bash
-git clone https://github.com/josharsh/mcp-jest
+# Clone the repository
 cd mcp-jest
 npm install
 npm run dev        # Start development mode
@@ -174,7 +174,7 @@ npm run build     # Build for production
 
 ### Ways to Contribute
 
-- 🐛 **Bug Reports**: Found an issue? [Open an issue](https://github.com/josharsh/mcp-jest/issues)
+- 🐛 **Bug Reports**: Found an issue? Report it in the issue tracker
 - 💡 **Feature Requests**: Have an idea? We'd love to hear it
 - 📝 **Documentation**: Help improve our docs
 - 🧪 **Test Cases**: Add tests for edge cases
@@ -220,8 +220,8 @@ expect: (result) => {
 ### Get Help
 
 - 📖 **[Full Documentation](./docs/)**: Comprehensive guides and examples
-- 💬 **[GitHub Discussions](https://github.com/josharsh/mcp-jest/discussions)**: Community Q&A
-- 🐛 **[Issues](https://github.com/josharsh/mcp-jest/issues)**: Bug reports and feature requests
+- 💬 **Community Q&A**: Join the community discussions
+- 🐛 **Issues**: Bug reports and feature requests
 - 📧 **Email**: For private inquiries
 
 ---
@@ -236,9 +236,9 @@ expect: (result) => {
 
 ## 🎉 Join the Community
 
-- ⭐ **[Star on GitHub](https://github.com/josharsh/mcp-jest)**: Show your support
-- 🐦 **[Follow Updates](https://twitter.com/yourhandle)**: Get the latest news
-- 💬 **[Join Discussions](https://github.com/josharsh/mcp-jest/discussions)**: Connect with other developers
+- ⭐ **Show your support**: Give us a star
+- 🐦 **Follow Updates**: Get the latest news
+- 💬 **Join Discussions**: Connect with other developers
 - 🔄 **Share**: Help others discover mcp-jest
 
 ---
