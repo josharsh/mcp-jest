@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & Discussions
+    url: https://github.com/josharsh/mcp-jest/discussions
+    about: Please ask and answer questions here
+  - name: Documentation
+    url: https://github.com/josharsh/mcp-jest/tree/main/docs
+    about: Check out our documentation for usage guides
+  - name: Security Issues
+    url: https://github.com/josharsh/mcp-jest/security/policy
+    about: Please report security vulnerabilities here
