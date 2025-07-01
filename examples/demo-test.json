@@ -1,0 +1,34 @@
+{
+  "server": {
+    "command": "node",
+    "args": ["examples/demo-server.js"]
+  },
+  "tests": {
+    "tools": {
+      "add": {
+        "args": { "a": 5, "b": 3 },
+        "expect": "content[0].text === '8'"
+      },
+      "search": {
+        "args": { "query": "test" },
+        "expect": "exists"
+      },
+      "echo": {
+        "args": { "message": "Hello MCP" },
+        "expect": "content[0].text === 'Echo: Hello MCP'"
+      }
+    },
+    "resources": {
+      "greeting://john": {
+        "expect": "contents[0].text.includes('Hello, john')"
+      }
+    },
+    "prompts": {
+      "review-code": {
+        "args": { "code": "console.log('test');" },
+        "expect": "exists"
+      }
+    },
+    "timeout": 10000
+  }
+}

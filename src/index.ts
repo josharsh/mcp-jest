@@ -4,6 +4,7 @@ import type { MCPTestConfig, MCPServerConfig, TestSuite } from './types.js';
 export * from './types.js';
 export { MCPTestClient } from './client.js';
 export { MCPTestRunner } from './runner.js';
+export { SnapshotManager } from './snapshot.js';
 
 /**
  * Test an MCP server with the given configuration

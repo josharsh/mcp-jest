@@ -15,6 +15,7 @@ interface CLIOptions {
   timeout?: number;
   help?: boolean;
   version?: boolean;
+  updateSnapshots?: boolean;
 }
 
 function parseArgs(args: string[]): CLIOptions {
@@ -59,6 +60,10 @@ function parseArgs(args: string[]): CLIOptions {
       case '--timeout':
         options.timeout = parseInt(args[++i]) || 30000;
         break;
+      case '-u':
+      case '--update-snapshots':
+        options.updateSnapshots = true;
+        break;
       default:
         if (!arg.startsWith('-')) {
           positionalArgs.push(arg);
@@ -95,6 +100,7 @@ OPTIONS:
   -r, --resources <res>   Comma-separated list of resources to test
   -p, --prompts <prompts> Comma-separated list of prompts to test
   --timeout <ms>          Test timeout in milliseconds (default: 30000)
+  -u, --update-snapshots  Update snapshots instead of comparing
 
 EXAMPLES:
   # Test a Node.js MCP server
@@ -205,6 +211,12 @@ async function main(): Promise<void> {
   }
   
   try {
+    // Set environment variable for snapshot updates
+    if (options.updateSnapshots) {
+      process.env.UPDATE_SNAPSHOTS = 'true';
+      console.log('📸 Snapshot update mode enabled');
+    }
+    
     console.log(`🚀 Testing MCP server: ${serverConfig.command} ${(serverConfig.args || []).join(' ')}`);
     console.log('');
     

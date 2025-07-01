@@ -1,4 +1,5 @@
 import { MCPTestClient } from './client.js';
+import { SnapshotManager } from './snapshot.js';
 import type { 
   MCPTestConfig, 
   MCPServerConfig, 
@@ -7,11 +8,13 @@ import type {
   ToolTestConfig,
   ResourceTestConfig,
   PromptTestConfig,
-  MCPCapabilities 
+  MCPCapabilities,
+  SnapshotConfig 
 } from './types.js';
 
 export class MCPTestRunner {
   private client: MCPTestClient;
+  private snapshotManager: SnapshotManager;
   private results: TestResult[] = [];
   private startTime = 0;
 
@@ -20,6 +23,7 @@ export class MCPTestRunner {
     private testConfig: MCPTestConfig
   ) {
     this.client = new MCPTestClient(serverConfig);
+    this.snapshotManager = new SnapshotManager();
   }
 
   async run(): Promise<TestSuite> {
@@ -27,6 +31,9 @@ export class MCPTestRunner {
     this.results = [];
 
     try {
+      // Initialize snapshot manager
+      await this.snapshotManager.init();
+
       // Test connection
       await this.testConnection();
 
@@ -224,6 +231,43 @@ export class MCPTestRunner {
     try {
       const result = await this.client.callTool(name, config.args || {});
       
+      // Handle snapshot testing
+      if (config.snapshot) {
+        const snapshotConfig = this.normalizeSnapshotConfig(config.snapshot);
+        const snapshotName = this.snapshotManager.generateSnapshotName(
+          'tool',
+          name,
+          snapshotConfig.name
+        );
+        
+        const snapshotResult = await this.snapshotManager.compareSnapshot(
+          snapshotName,
+          result,
+          snapshotConfig
+        );
+        
+        if (snapshotResult.match) {
+          this.addResult({
+            name: `Tool '${name}' snapshot`,
+            type: 'tool',
+            status: 'pass',
+            message: `Snapshot matches expected output`,
+            duration: Date.now() - startTime
+          });
+        } else {
+          this.addResult({
+            name: `Tool '${name}' snapshot`,
+            type: 'tool',
+            status: 'fail',
+            message: `Snapshot mismatch:\n${snapshotResult.diff}`,
+            duration: Date.now() - startTime
+          });
+        }
+        
+        // If snapshot testing, don't run other expectations
+        return;
+      }
+      
       // Validate result if expectation provided
       if (config.expect) {
         const isValid = typeof config.expect === 'function' 
@@ -368,6 +412,43 @@ export class MCPTestRunner {
     try {
       const content = await this.client.readResource(uri);
       
+      // Handle snapshot testing
+      if (config.snapshot) {
+        const snapshotConfig = this.normalizeSnapshotConfig(config.snapshot);
+        const snapshotName = this.snapshotManager.generateSnapshotName(
+          'resource',
+          uri.replace(/[^a-zA-Z0-9-]/g, '_'), // Sanitize URI for filename
+          snapshotConfig.name
+        );
+        
+        const snapshotResult = await this.snapshotManager.compareSnapshot(
+          snapshotName,
+          content,
+          snapshotConfig
+        );
+        
+        if (snapshotResult.match) {
+          this.addResult({
+            name: `Resource '${uri}' snapshot`,
+            type: 'resource',
+            status: 'pass',
+            message: `Snapshot matches expected output`,
+            duration: Date.now() - startTime
+          });
+        } else {
+          this.addResult({
+            name: `Resource '${uri}' snapshot`,
+            type: 'resource',
+            status: 'fail',
+            message: `Snapshot mismatch:\n${snapshotResult.diff}`,
+            duration: Date.now() - startTime
+          });
+        }
+        
+        // If snapshot testing, don't run other expectations
+        return;
+      }
+      
       // Validate content if expectation provided
       if (config.expect) {
         const isValid = typeof config.expect === 'function'
@@ -429,6 +510,43 @@ export class MCPTestRunner {
     
     try {
       const result = await this.client.getPrompt(name, config.args || {});
+      
+      // Handle snapshot testing
+      if (config.snapshot) {
+        const snapshotConfig = this.normalizeSnapshotConfig(config.snapshot);
+        const snapshotName = this.snapshotManager.generateSnapshotName(
+          'prompt',
+          name,
+          snapshotConfig.name
+        );
+        
+        const snapshotResult = await this.snapshotManager.compareSnapshot(
+          snapshotName,
+          result,
+          snapshotConfig
+        );
+        
+        if (snapshotResult.match) {
+          this.addResult({
+            name: `Prompt '${name}' snapshot`,
+            type: 'prompt',
+            status: 'pass',
+            message: `Snapshot matches expected output`,
+            duration: Date.now() - startTime
+          });
+        } else {
+          this.addResult({
+            name: `Prompt '${name}' snapshot`,
+            type: 'prompt',
+            status: 'fail',
+            message: `Snapshot mismatch:\n${snapshotResult.diff}`,
+            duration: Date.now() - startTime
+          });
+        }
+        
+        // If snapshot testing, don't run other expectations
+        return;
+      }
       
       // Validate result if expectation provided
       if (config.expect) {
@@ -668,5 +786,15 @@ export class MCPTestRunner {
       results: this.results,
       duration: Date.now() - this.startTime
     };
+  }
+
+  private normalizeSnapshotConfig(snapshot: boolean | string | SnapshotConfig): SnapshotConfig {
+    if (typeof snapshot === 'boolean') {
+      return snapshot ? {} : { updateSnapshot: false };
+    }
+    if (typeof snapshot === 'string') {
+      return { name: snapshot };
+    }
+    return snapshot;
   }
 }

@@ -99,3 +99,25 @@ public
 # Temporary folders
 tmp/
 temp/
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+__snapshots__/
+
+# Internal files and directories
+*_internal*
+*internal*
+
+# Local development files
+test-global*.js
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

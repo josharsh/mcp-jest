@@ -10,16 +10,37 @@ export interface ToolTestConfig {
   args?: Record<string, unknown>;
   expect?: string | ((result: unknown) => boolean);
   shouldThrow?: boolean;
+  snapshot?: boolean | string | SnapshotConfig;
 }
 
 export interface ResourceTestConfig {
   expect?: string | ((content: unknown) => boolean);
   shouldExist?: boolean;
+  snapshot?: boolean | string | SnapshotConfig;
 }
 
 export interface PromptTestConfig {
   args?: Record<string, unknown>;
   expect?: string | ((result: unknown) => boolean);
+  snapshot?: boolean | string | SnapshotConfig;
+}
+
+export interface SnapshotConfig {
+  name?: string;
+  properties?: string[];
+  exclude?: string[];
+  updateSnapshot?: boolean;
+}
+
+export interface Snapshot {
+  name: string;
+  timestamp: string;
+  data: unknown;
+  metadata?: {
+    testType: 'tool' | 'resource' | 'prompt';
+    testName: string;
+    serverCommand?: string;
+  };
 }
 
 export interface MCPServerConfig {
