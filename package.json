@@ -1,6 +1,6 @@
 {
   "name": "mcp-jest",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "description": "Testing framework for Model Context Protocol (MCP) servers - like Jest but for MCP",
   "type": "module",
   "main": "dist/index.js",
@@ -48,6 +48,10 @@
   },
   "homepage": "https://github.com/josharsh/mcp-jest#readme",
   "license": "MIT",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/josharsh"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
     "zod": "^3.22.0"

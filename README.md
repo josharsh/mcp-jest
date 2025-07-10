@@ -106,11 +106,17 @@ Describe *what* to test, not *how*. Focus on your server logic, not test infrast
 - **Config Files**: Complex test scenarios
 - **TypeScript**: Full type safety included
 
-### 📸 **Snapshot Testing** (NEW!)
+### 📸 **Snapshot Testing**
 - **Capture Outputs**: Save MCP responses as snapshots
 - **Detect Changes**: Know when outputs change unexpectedly
 - **Easy Updates**: Update snapshots with a single flag
 - **Selective Snapshots**: Choose specific fields to track
+
+### 🎯 **Test Filtering** (NEW v1.0.10!)
+- **Filter Tests**: Run only tests matching a pattern with `--filter`
+- **Skip Tests**: Exclude tests from running with `--skip`
+- **Wildcard Support**: Use `*` for flexible pattern matching
+- **Fast Iteration**: Focus on specific tests during development
 
 ---
 
@@ -175,6 +181,21 @@ const results = await mcpTest(
 
 // Update snapshots when changes are intentional
 // mcp-jest node ./server.js --update-snapshots
+```
+
+### Test Filtering (NEW!)
+```bash
+# Run only search-related tests
+mcp-jest node ./server.js --tools "search,email,weather" --filter search
+
+# Skip email tests during development
+mcp-jest node ./server.js --tools "search,email,weather" --skip email
+
+# Use wildcards for flexible filtering
+mcp-jest node ./server.js --tools "getUser,getUserProfile,updateUser" --filter "user*"
+
+# Combine with other options
+mcp-jest node ./server.js --filter search --timeout 5000 --update-snapshots
 ```
 
 ## 🚀 Ecosystem Integration

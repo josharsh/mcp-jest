@@ -7,11 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.10] - 2025-01-10
+
 ### Added
-- Comprehensive open source documentation
-- GitHub issue and PR templates
-- Security policy and contribution guidelines
-- CI/CD workflows for automated testing and release
+- Test filtering with `--filter` flag to run only matching tests
+- Test exclusion with `--skip` flag to skip specific tests
+- Funding field in package.json for GitHub sponsorship
+- Support for wildcard patterns in filter/skip options
+- Enhanced help documentation with filtering examples
+
+### Changed
+- Tests can now be selectively run based on name patterns
+- Skipped tests are properly reported in test results
 
 ## [1.0.8] - 2025-01-01
 

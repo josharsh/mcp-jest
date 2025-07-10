@@ -4,6 +4,8 @@ export interface MCPTestConfig {
   prompts?: string[] | Record<string, PromptTestConfig>;
   timeout?: number;
   maxRetries?: number;
+  filter?: string;
+  skip?: string;
 }
 
 export interface ToolTestConfig {

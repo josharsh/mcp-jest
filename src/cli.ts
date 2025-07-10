@@ -16,6 +16,8 @@ interface CLIOptions {
   help?: boolean;
   version?: boolean;
   updateSnapshots?: boolean;
+  filter?: string;
+  skip?: string;
 }
 
 function parseArgs(args: string[]): CLIOptions {
@@ -64,6 +66,13 @@ function parseArgs(args: string[]): CLIOptions {
       case '--update-snapshots':
         options.updateSnapshots = true;
         break;
+      case '-f':
+      case '--filter':
+        options.filter = args[++i];
+        break;
+      case '--skip':
+        options.skip = args[++i];
+        break;
       default:
         if (!arg.startsWith('-')) {
           positionalArgs.push(arg);
@@ -101,6 +110,8 @@ OPTIONS:
   -p, --prompts <prompts> Comma-separated list of prompts to test
   --timeout <ms>          Test timeout in milliseconds (default: 30000)
   -u, --update-snapshots  Update snapshots instead of comparing
+  -f, --filter <pattern>  Run only tests matching pattern
+  --skip <pattern>        Skip tests matching pattern
 
 EXAMPLES:
   # Test a Node.js MCP server
@@ -114,6 +125,12 @@ EXAMPLES:
 
   # Test specific capabilities
   mcp-jest ./server --tools "search,email" --resources "docs/*"
+
+  # Filter tests by pattern
+  mcp-jest ./server --tools "search,email,weather" --filter search
+
+  # Skip specific tests
+  mcp-jest ./server --tools "search,email,weather" --skip email
 
 CONFIGURATION FILE:
   Create a mcp-jest.json file:
@@ -206,7 +223,9 @@ async function main(): Promise<void> {
       tools: options.tools,
       resources: options.resources,
       prompts: options.prompts,
-      timeout: options.timeout
+      timeout: options.timeout,
+      filter: options.filter,
+      skip: options.skip
     };
   }
   

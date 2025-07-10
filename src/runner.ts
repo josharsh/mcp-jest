@@ -135,6 +135,16 @@ export class MCPTestRunner {
       const availableTools = capabilities.tools?.map(t => t.name) || [];
       
       for (const toolName of expectedTools) {
+        if (!this.shouldRunTest(toolName)) {
+          this.addResult({
+            name: `Tool '${toolName}' exists`,
+            type: 'capability',
+            status: 'skip',
+            message: `Skipped due to filter/skip pattern`
+          });
+          continue;
+        }
+        
         if (availableTools.includes(toolName)) {
           this.addResult({
             name: `Tool '${toolName}' exists`,
@@ -162,6 +172,16 @@ export class MCPTestRunner {
       const availableResources = capabilities.resources?.map(r => r.uri) || [];
       
       for (const resourcePattern of expectedResources) {
+        if (!this.shouldRunTest(resourcePattern)) {
+          this.addResult({
+            name: `Resource '${resourcePattern}' exists`,
+            type: 'capability',
+            status: 'skip',
+            message: `Skipped due to filter/skip pattern`
+          });
+          continue;
+        }
+        
         // Simple pattern matching - could be enhanced
         const found = availableResources.some(uri => 
           this.matchesPattern(uri, resourcePattern)
@@ -194,6 +214,16 @@ export class MCPTestRunner {
       const availablePrompts = capabilities.prompts?.map(p => p.name) || [];
       
       for (const promptName of expectedPrompts) {
+        if (!this.shouldRunTest(promptName)) {
+          this.addResult({
+            name: `Prompt '${promptName}' exists`,
+            type: 'capability',
+            status: 'skip',
+            message: `Skipped due to filter/skip pattern`
+          });
+          continue;
+        }
+        
         if (availablePrompts.includes(promptName)) {
           this.addResult({
             name: `Prompt '${promptName}' exists`,
@@ -221,7 +251,16 @@ export class MCPTestRunner {
       : this.testConfig.tools;
 
     for (const [toolName, config] of Object.entries(toolsToTest)) {
-      await this.testTool(toolName, config as ToolTestConfig);
+      if (this.shouldRunTest(toolName)) {
+        await this.testTool(toolName, config as ToolTestConfig);
+      } else {
+        this.addResult({
+          name: `Tool '${toolName}' execution`,
+          type: 'tool',
+          status: 'skip',
+          message: `Skipped due to filter/skip pattern`
+        });
+      }
     }
   }
 
@@ -330,6 +369,16 @@ export class MCPTestRunner {
       : this.testConfig.resources;
 
     for (const [pattern, config] of Object.entries(resourcesToTest)) {
+      if (!this.shouldRunTest(pattern)) {
+        this.addResult({
+          name: `Resource '${pattern}' test`,
+          type: 'resource',
+          status: 'skip',
+          message: `Skipped due to filter/skip pattern`
+        });
+        continue;
+      }
+      
       // Find matching resources
       const matchingResources = capabilities.resources?.filter(r => 
         this.matchesPattern(r.uri, pattern)
@@ -501,7 +550,16 @@ export class MCPTestRunner {
       : this.testConfig.prompts;
 
     for (const [promptName, config] of Object.entries(promptsToTest)) {
-      await this.testPrompt(promptName, config as PromptTestConfig);
+      if (this.shouldRunTest(promptName)) {
+        await this.testPrompt(promptName, config as PromptTestConfig);
+      } else {
+        this.addResult({
+          name: `Prompt '${promptName}' execution`,
+          type: 'prompt',
+          status: 'skip',
+          message: `Skipped due to filter/skip pattern`
+        });
+      }
     }
   }
 
@@ -598,6 +656,37 @@ export class MCPTestRunner {
       .replace(/\*/g, '.*')
       .replace(/\?/g, '.');
     return new RegExp(`^${regex}$`).test(value);
+  }
+
+  private shouldRunTest(testName: string): boolean {
+    // Check if test should be skipped
+    if (this.testConfig.skip && this.matchesFilterPattern(testName, this.testConfig.skip)) {
+      return false;
+    }
+    
+    // Check if test matches filter
+    if (this.testConfig.filter && !this.matchesFilterPattern(testName, this.testConfig.filter)) {
+      return false;
+    }
+    
+    return true;
+  }
+
+  private matchesFilterPattern(testName: string, pattern: string): boolean {
+    // Case-insensitive partial match
+    const lowerTestName = testName.toLowerCase();
+    const lowerPattern = pattern.toLowerCase();
+    
+    // Support simple wildcards
+    if (pattern.includes('*')) {
+      const regex = pattern
+        .replace(/\*/g, '.*')
+        .replace(/\?/g, '.');
+      return new RegExp(regex, 'i').test(testName);
+    }
+    
+    // Otherwise do a simple substring match
+    return lowerTestName.includes(lowerPattern);
   }
 
   private evaluateExpectation(value: unknown, expectation: string): boolean {
