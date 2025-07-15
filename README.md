@@ -52,6 +52,8 @@ Building MCP servers? You've probably experienced this:
 - [Security](#-security)
 - [License](#-license)
 
+📚 **Documentation**: [https://mcp-jest.ddiy.diy/](https://mcp-jest.ddiy.diy/)
+
 ## ⚡ Quick Start (30 seconds)
 
 ### 1. Install
