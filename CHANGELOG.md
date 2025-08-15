@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.13] - 2025-01-15
+
+### Added
+- **HTTP Transport Support**: Added support for testing MCP servers over HTTP
+  - StreamableHTTP transport for modern HTTP-based MCP servers
+  - SSE (Server-Sent Events) transport for real-time connections
+  - New CLI flags: `--transport` and `--url` for HTTP configuration
+  - Config file support for transport settings
+- **Enhanced Compatibility**: Better support for servers with partial MCP implementation
+  - Graceful handling of "Method not found" errors
+  - Support for servers that only implement some capabilities (e.g., fastMCP)
+  - Each capability type (tools, resources, prompts) queried independently
+
+### Changed
+- Transport configuration is now explicit with `transport` field (defaults to `stdio` for backward compatibility)
+- Error handling in capability discovery is more robust and selective
+- CLI help documentation updated with HTTP transport examples
+
+### Fixed
+- Fixed compatibility issues with fastMCP and similar servers that don't implement all MCP methods
+- Fixed error propagation to ensure non-"Method not found" errors are still reported
+
 ## [1.0.10] - 2025-01-10
 
 ### Added
@@ -103,7 +125,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Simple test configuration format
 - Connection and capability testing
 
-[Unreleased]: https://github.com/josharsh/mcp-jest/compare/v1.0.8...HEAD
+[Unreleased]: https://github.com/josharsh/mcp-jest/compare/v1.0.13...HEAD
+[1.0.13]: https://github.com/josharsh/mcp-jest/compare/v1.0.10...v1.0.13
+[1.0.10]: https://github.com/josharsh/mcp-jest/compare/v1.0.8...v1.0.10
 [1.0.8]: https://github.com/josharsh/mcp-jest/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/josharsh/mcp-jest/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/josharsh/mcp-jest/compare/v1.0.5...v1.0.6

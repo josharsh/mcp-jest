@@ -1,20 +1,46 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import type { MCPServerConfig, MCPCapabilities, TestResult } from './types.js';
 
 export class MCPTestClient {
   private client?: Client;
-  private transport?: StdioClientTransport;
+  private transport?: StdioClientTransport | StreamableHTTPClientTransport | SSEClientTransport;
   
   constructor(private serverConfig: MCPServerConfig) {}
 
   async connect(timeout: number = 30000): Promise<void> {
     try {
-      this.transport = new StdioClientTransport({
-        command: this.serverConfig.command,
-        args: this.serverConfig.args || [],
-        env: this.serverConfig.env
-      });
+      // Create transport based on configuration
+      const transportType = this.serverConfig.transport || 'stdio';
+      
+      switch (transportType) {
+        case 'stdio':
+          this.transport = new StdioClientTransport({
+            command: this.serverConfig.command,
+            args: this.serverConfig.args || [],
+            env: this.serverConfig.env
+          });
+          break;
+          
+        case 'streamable-http':
+          if (!this.serverConfig.url) {
+            throw new Error('URL is required for streamable-http transport');
+          }
+          this.transport = new StreamableHTTPClientTransport(new URL(this.serverConfig.url));
+          break;
+          
+        case 'sse':
+          if (!this.serverConfig.url) {
+            throw new Error('URL is required for SSE transport');
+          }
+          this.transport = new SSEClientTransport(new URL(this.serverConfig.url));
+          break;
+          
+        default:
+          throw new Error(`Unsupported transport type: ${transportType}`);
+      }
 
       this.client = new Client({
         name: "mcp-jest-client",
@@ -65,19 +91,50 @@ export class MCPTestClient {
     }
 
     try {
-      // List tools
-      const toolsResponse = await this.client.listTools();
+      // Initialize arrays to handle potential errors gracefully
+      let tools: any[] = [];
+      let resources: any[] = [];
+      let prompts: any[] = [];
+      
+      // Try to list tools with error handling
+      try {
+        const toolsResponse = await this.client.listTools();
+        tools = toolsResponse.tools || [];
+      } catch (error) {
+        // If method not found, it might be because the server doesn't support it
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (!errorMessage.includes('Method not found')) {
+          throw error;
+        }
+        // Otherwise, continue with empty tools array
+      }
 
-      // List resources  
-      const resourcesResponse = await this.client.listResources();
+      // Try to list resources with error handling
+      try {
+        const resourcesResponse = await this.client.listResources();
+        resources = resourcesResponse.resources || [];
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (!errorMessage.includes('Method not found')) {
+          throw error;
+        }
+      }
 
-      // List prompts
-      const promptsResponse = await this.client.listPrompts();
+      // Try to list prompts with error handling
+      try {
+        const promptsResponse = await this.client.listPrompts();
+        prompts = promptsResponse.prompts || [];
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (!errorMessage.includes('Method not found')) {
+          throw error;
+        }
+      }
 
       return {
-        tools: toolsResponse.tools || [],
-        resources: resourcesResponse.resources || [],
-        prompts: promptsResponse.prompts || []
+        tools,
+        resources,
+        prompts
       };
     } catch (error) {
       throw new Error(`Failed to get capabilities: ${error instanceof Error ? error.message : String(error)}`);

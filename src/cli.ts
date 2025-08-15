@@ -18,6 +18,8 @@ interface CLIOptions {
   updateSnapshots?: boolean;
   filter?: string;
   skip?: string;
+  transport?: 'stdio' | 'sse' | 'streamable-http';
+  url?: string;
 }
 
 function parseArgs(args: string[]): CLIOptions {
@@ -73,6 +75,18 @@ function parseArgs(args: string[]): CLIOptions {
       case '--skip':
         options.skip = args[++i];
         break;
+      case '--transport':
+        const transport = args[++i];
+        if (transport === 'stdio' || transport === 'sse' || transport === 'streamable-http') {
+          options.transport = transport;
+        } else {
+          console.error(`Invalid transport type: ${transport}. Must be one of: stdio, sse, streamable-http`);
+          process.exit(1);
+        }
+        break;
+      case '--url':
+        options.url = args[++i];
+        break;
       default:
         if (!arg.startsWith('-')) {
           positionalArgs.push(arg);
@@ -103,22 +117,30 @@ OPTIONS:
   -h, --help              Show this help message
   -v, --version           Show version
   -c, --config <file>     Load configuration from JSON file
-  -s, --server <cmd>      Server command to test
+  -s, --server <cmd>      Server command to test (for stdio transport)
   --args <args>           Comma-separated server arguments
   -t, --tools <tools>     Comma-separated list of tools to test
   -r, --resources <res>   Comma-separated list of resources to test
   -p, --prompts <prompts> Comma-separated list of prompts to test
   --timeout <ms>          Test timeout in milliseconds (default: 30000)
   -u, --update-snapshots  Update snapshots instead of comparing
-  -f, --filter <pattern>  Run only tests matching pattern
-  --skip <pattern>        Skip tests matching pattern
+  -f, --filter <pattern>  Run only tests matching the pattern
+  --skip <pattern>        Skip tests matching the pattern
+  --transport <type>      Transport type: stdio, sse, streamable-http (default: stdio)
+  --url <url>             Server URL (required for sse and streamable-http)
 
 EXAMPLES:
-  # Test a Node.js MCP server
+  # Test a Node.js MCP server (stdio)
   mcp-jest node ./my-server.js --tools search,email
 
   # Test a Python MCP server with resources
   mcp-jest python server.py --tools search --resources "docs/*,config.json"
+
+  # Test an HTTP MCP server
+  mcp-jest --transport streamable-http --url http://localhost:3000 --tools search
+
+  # Test an SSE MCP server
+  mcp-jest --transport sse --url http://localhost:3000 --tools search,email
 
   # Use a configuration file
   mcp-jest --config ./mcp-jest.json
@@ -127,10 +149,10 @@ EXAMPLES:
   mcp-jest ./server --tools "search,email" --resources "docs/*"
 
   # Filter tests by pattern
-  mcp-jest ./server --tools "search,email,weather" --filter search
-
-  # Skip specific tests
-  mcp-jest ./server --tools "search,email,weather" --skip email
+  mcp-jest node ./server.js --tools "search,email,weather" --filter search
+  
+  # Skip certain tests
+  mcp-jest ./server --skip "*test*"
 
 CONFIGURATION FILE:
   Create a mcp-jest.json file:
@@ -138,7 +160,8 @@ CONFIGURATION FILE:
     "server": {
       "command": "node",
       "args": ["./server.js"],
-      "env": { "NODE_ENV": "test" }
+      "env": { "NODE_ENV": "test" },
+      "transport": "stdio"
     },
     "tests": {
       "tools": {
@@ -150,6 +173,17 @@ CONFIGURATION FILE:
         "docs/*": { "expect": "count > 5" }
       },
       "timeout": 30000
+    }
+  }
+  
+  For HTTP transports:
+  {
+    "server": {
+      "transport": "streamable-http",
+      "url": "http://localhost:3000"
+    },
+    "tests": {
+      "tools": ["search", "email"]
     }
   }
 `);
@@ -209,14 +243,24 @@ async function main(): Promise<void> {
     }
   } else {
     // Build from CLI options
-    if (!options.server) {
-      console.error('❌ Error: Server command is required. Use --help for usage information.');
+    const transport = options.transport || 'stdio';
+    
+    // Validate transport-specific requirements
+    if (transport === 'stdio' && !options.server) {
+      console.error('❌ Error: Server command is required for stdio transport. Use --help for usage information.');
+      process.exit(1);
+    }
+    
+    if ((transport === 'sse' || transport === 'streamable-http') && !options.url) {
+      console.error(`❌ Error: URL is required for ${transport} transport. Use --url to specify the server URL.`);
       process.exit(1);
     }
     
     serverConfig = {
-      command: options.server,
-      args: options.args
+      command: options.server || '',
+      args: options.args,
+      transport: transport,
+      url: options.url
     };
     
     testConfig = {
@@ -236,7 +280,12 @@ async function main(): Promise<void> {
       console.log('📸 Snapshot update mode enabled');
     }
     
-    console.log(`🚀 Testing MCP server: ${serverConfig.command} ${(serverConfig.args || []).join(' ')}`);
+    const transport = serverConfig.transport || 'stdio';
+    if (transport === 'stdio') {
+      console.log(`🚀 Testing MCP server: ${serverConfig.command} ${(serverConfig.args || []).join(' ')}`);
+    } else {
+      console.log(`🚀 Testing MCP server: ${serverConfig.url} (${transport})`);
+    }
     console.log('');
     
     const results = await mcpTest(serverConfig, testConfig);

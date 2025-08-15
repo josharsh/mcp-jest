@@ -49,6 +49,8 @@ export interface MCPServerConfig {
   command: string;
   args?: string[];
   env?: Record<string, string>;
+  transport?: 'stdio' | 'sse' | 'streamable-http';
+  url?: string; // For HTTP-based transports
 }
 
 export interface TestResult {

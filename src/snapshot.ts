@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import { promises as fs } from 'fs';
 import path from 'path';
 import { createHash } from 'crypto';
 import { Snapshot, SnapshotConfig } from './types.js';
@@ -28,7 +28,7 @@ export class SnapshotManager {
   private async loadSnapshots(): Promise<void> {
     try {
       const files = await fs.readdir(this.snapshotDir);
-      const snapshotFiles = files.filter(f => f.endsWith('.snap.json'));
+      const snapshotFiles = files.filter((f: string) => f.endsWith('.snap.json'));
       
       for (const file of snapshotFiles) {
         const content = await fs.readFile(path.join(this.snapshotDir, file), 'utf-8');

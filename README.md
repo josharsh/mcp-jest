@@ -120,6 +120,17 @@ Describe *what* to test, not *how*. Focus on your server logic, not test infrast
 - **Wildcard Support**: Use `*` for flexible pattern matching
 - **Fast Iteration**: Focus on specific tests during development
 
+### 🌐 **HTTP Transport Support** (NEW v1.0.13!)
+- **Multiple Transports**: Test servers over stdio, HTTP streaming, or SSE
+- **Flexible Connectivity**: Support for remote and local HTTP servers
+- **Easy Configuration**: Simple CLI flags or config file settings
+- **Backward Compatible**: Existing stdio tests work without changes
+
+### 🛡️ **Enhanced Compatibility** (NEW v1.0.13!)
+- **FastMCP Support**: Works with servers that implement partial MCP protocol
+- **Graceful Error Handling**: Handle "Method not found" errors elegantly
+- **Flexible Servers**: Test servers that only implement some capabilities
+
 ---
 
 ## 🎯 Real-World Examples
@@ -199,6 +210,60 @@ mcp-jest node ./server.js --tools "getUser,getUserProfile,updateUser" --filter "
 # Combine with other options
 mcp-jest node ./server.js --filter search --timeout 5000 --update-snapshots
 ```
+
+### HTTP Transport Testing (NEW!)
+```bash
+# Test stdio server (default)
+mcp-jest node ./server.js --tools search,email
+
+# Test HTTP streaming server
+mcp-jest --transport streamable-http --url http://localhost:3000 --tools search
+
+# Test SSE server
+mcp-jest --transport sse --url http://api.example.com/sse --tools search,email
+
+# Use config file for HTTP transport
+cat > mcp-jest.json << EOF
+{
+  "server": {
+    "transport": "streamable-http",
+    "url": "http://localhost:3000/mcp"
+  },
+  "tests": {
+    "tools": ["search", "calculate"],
+    "timeout": 60000
+  }
+}
+EOF
+mcp-jest --config mcp-jest.json
+```
+
+## 📖 CLI Reference
+
+### Command Line Options
+
+```bash
+mcp-jest [OPTIONS] [SERVER_COMMAND]
+```
+
+#### Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `-h, --help` | Show help message | `mcp-jest --help` |
+| `-v, --version` | Show version | `mcp-jest --version` |
+| `-c, --config <file>` | Load configuration from JSON file | `mcp-jest --config test.json` |
+| `-s, --server <cmd>` | Server command to test (stdio only) | `mcp-jest --server "node server.js"` |
+| `--transport <type>` | Transport type: stdio, sse, streamable-http | `mcp-jest --transport streamable-http` |
+| `--url <url>` | Server URL (required for HTTP transports) | `mcp-jest --url http://localhost:3000` |
+| `--args <args>` | Comma-separated server arguments | `mcp-jest node server.js --args "port=3000,debug"` |
+| `-t, --tools <tools>` | Comma-separated list of tools to test | `mcp-jest --tools search,calculate` |
+| `-r, --resources <res>` | Comma-separated list of resources to test | `mcp-jest --resources "data/*,config.json"` |
+| `-p, --prompts <prompts>` | Comma-separated list of prompts to test | `mcp-jest --prompts analyze,summarize` |
+| `--timeout <ms>` | Test timeout in milliseconds | `mcp-jest --timeout 60000` |
+| `-u, --update-snapshots` | Update snapshots instead of comparing | `mcp-jest -u` |
+| `-f, --filter <pattern>` | Run only tests matching pattern | `mcp-jest --filter "search*"` |
+| `--skip <pattern>` | Skip tests matching pattern | `mcp-jest --skip "*test*"` |
 
 ## 🚀 Ecosystem Integration
 

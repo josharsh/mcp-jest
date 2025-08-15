@@ -44,6 +44,7 @@ pids
 *.seed
 *.pid.lock
 
+package-lock.json
 # Coverage directory used by tools like istanbul
 coverage/
 *.lcov
