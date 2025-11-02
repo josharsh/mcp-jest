@@ -765,3 +765,5 @@ Need help? We're here to support you:
 - **Email** - For private inquiries, reach out to [support@mcp-jest.dev](mailto:support@mcp-jest.dev)
 
 Before opening an issue, please check if your question has already been answered in the documentation or existing issues.
+
+[![MCP Tests](https://github.com/YOUR_USERNAME/YOUR_REPOSITORY/actions/workflows/YOUR_WORKFLOW_FILE.yml/badge.svg)](https://github.com/YOUR_USERNAME/YOUR_REPOSITORY/actions/workflows/YOUR_WORKFLOW_FILE.yml)
