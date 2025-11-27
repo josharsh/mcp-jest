@@ -1,0 +1,58 @@
+{
+  "server": {
+    "command": "node",
+    "args": [
+      "e2e/test-server.js"
+    ],
+    "transport": "stdio"
+  },
+  "tests": {
+    "tools": {
+      "calculate": {
+        "args": {
+          "expression": "2 + 2"
+        },
+        "expect": "content && content.length > 0"
+      },
+      "calculate:missing-expression": {
+        "args": {},
+        "shouldThrow": true
+      },
+      "echo": {
+        "args": {
+          "message": "test_value"
+        },
+        "expect": "content && content.length > 0"
+      },
+      "echo:missing-message": {
+        "args": {},
+        "shouldThrow": true
+      },
+      "greet": {
+        "args": {
+          "name": "Test Name"
+        },
+        "expect": "content && content.length > 0"
+      },
+      "greet:missing-name": {
+        "args": {},
+        "shouldThrow": true
+      }
+    },
+    "resources": {
+      "config://settings": {
+        "expect": "exists"
+      },
+      "data://users": {
+        "expect": "exists"
+      }
+    },
+    "prompts": {
+      "code-review": {
+        "args": {},
+        "expect": "messages && messages.length > 0"
+      }
+    },
+    "timeout": 30000
+  }
+}

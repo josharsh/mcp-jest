@@ -1,0 +1,246 @@
+name: 'MCP-Jest Test'
+description: 'Test your MCP servers with mcp-jest - the Jest-like testing framework for Model Context Protocol'
+author: 'Harsh Joshi'
+branding:
+  icon: 'check-circle'
+  color: 'green'
+
+inputs:
+  server-command:
+    description: 'Command to start the MCP server (e.g., "node ./server.js")'
+    required: false
+  server-args:
+    description: 'Additional arguments for the server command (comma-separated)'
+    required: false
+  config:
+    description: 'Path to mcp-jest configuration file'
+    required: false
+  tools:
+    description: 'Comma-separated list of tools to test'
+    required: false
+  resources:
+    description: 'Comma-separated list of resources to test'
+    required: false
+  prompts:
+    description: 'Comma-separated list of prompts to test'
+    required: false
+  timeout:
+    description: 'Test timeout in milliseconds (default: 30000)'
+    required: false
+    default: '30000'
+  transport:
+    description: 'Transport type: stdio, sse, streamable-http (default: stdio)'
+    required: false
+    default: 'stdio'
+  url:
+    description: 'Server URL (required for HTTP transports)'
+    required: false
+  filter:
+    description: 'Run only tests matching this pattern'
+    required: false
+  skip:
+    description: 'Skip tests matching this pattern'
+    required: false
+  update-snapshots:
+    description: 'Update snapshots instead of comparing'
+    required: false
+    default: 'false'
+  reporter:
+    description: 'Reporter type: console, html, json (default: console)'
+    required: false
+    default: 'console'
+  report-output:
+    description: 'Output path for HTML/JSON reports'
+    required: false
+  validate:
+    description: 'Run protocol compliance validation instead of tests'
+    required: false
+    default: 'false'
+  discover:
+    description: 'Run auto-discovery mode to generate test configuration'
+    required: false
+    default: 'false'
+  discovery-output:
+    description: 'Output path for discovery results'
+    required: false
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '20'
+  working-directory:
+    description: 'Working directory for running tests'
+    required: false
+    default: '.'
+
+outputs:
+  passed:
+    description: 'Number of tests passed'
+    value: ${{ steps.run-tests.outputs.passed }}
+  failed:
+    description: 'Number of tests failed'
+    value: ${{ steps.run-tests.outputs.failed }}
+  total:
+    description: 'Total number of tests'
+    value: ${{ steps.run-tests.outputs.total }}
+  pass-rate:
+    description: 'Pass rate percentage'
+    value: ${{ steps.run-tests.outputs.pass-rate }}
+  duration:
+    description: 'Test duration in milliseconds'
+    value: ${{ steps.run-tests.outputs.duration }}
+  report-path:
+    description: 'Path to generated report (if using html/json reporter)'
+    value: ${{ steps.run-tests.outputs.report-path }}
+  compliance-score:
+    description: 'Protocol compliance score (if using validate mode)'
+    value: ${{ steps.run-tests.outputs.compliance-score }}
+  compliance-level:
+    description: 'Protocol compliance level (if using validate mode)'
+    value: ${{ steps.run-tests.outputs.compliance-level }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Install mcp-jest
+      shell: bash
+      run: npm install -g mcp-jest
+
+    - name: Run MCP-Jest
+      id: run-tests
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        MCP_JEST_CI: 'true'
+      run: |
+        # Build command based on inputs
+        CMD="mcp-jest"
+
+        # Check for discover mode
+        if [ "${{ inputs.discover }}" = "true" ]; then
+          CMD="$CMD discover"
+          if [ -n "${{ inputs.discovery-output }}" ]; then
+            CMD="$CMD -o ${{ inputs.discovery-output }}"
+          fi
+        fi
+
+        # Check for validate mode
+        if [ "${{ inputs.validate }}" = "true" ]; then
+          CMD="$CMD validate"
+        fi
+
+        # Add config file if specified
+        if [ -n "${{ inputs.config }}" ]; then
+          CMD="$CMD --config ${{ inputs.config }}"
+        fi
+
+        # Add server command for stdio transport
+        if [ -n "${{ inputs.server-command }}" ]; then
+          CMD="$CMD ${{ inputs.server-command }}"
+        fi
+
+        # Add server args
+        if [ -n "${{ inputs.server-args }}" ]; then
+          CMD="$CMD --args ${{ inputs.server-args }}"
+        fi
+
+        # Add transport
+        if [ "${{ inputs.transport }}" != "stdio" ]; then
+          CMD="$CMD --transport ${{ inputs.transport }}"
+        fi
+
+        # Add URL for HTTP transports
+        if [ -n "${{ inputs.url }}" ]; then
+          CMD="$CMD --url ${{ inputs.url }}"
+        fi
+
+        # Add tools
+        if [ -n "${{ inputs.tools }}" ]; then
+          CMD="$CMD --tools ${{ inputs.tools }}"
+        fi
+
+        # Add resources
+        if [ -n "${{ inputs.resources }}" ]; then
+          CMD="$CMD --resources ${{ inputs.resources }}"
+        fi
+
+        # Add prompts
+        if [ -n "${{ inputs.prompts }}" ]; then
+          CMD="$CMD --prompts ${{ inputs.prompts }}"
+        fi
+
+        # Add timeout
+        CMD="$CMD --timeout ${{ inputs.timeout }}"
+
+        # Add filter
+        if [ -n "${{ inputs.filter }}" ]; then
+          CMD="$CMD --filter ${{ inputs.filter }}"
+        fi
+
+        # Add skip
+        if [ -n "${{ inputs.skip }}" ]; then
+          CMD="$CMD --skip ${{ inputs.skip }}"
+        fi
+
+        # Add update snapshots
+        if [ "${{ inputs.update-snapshots }}" = "true" ]; then
+          CMD="$CMD --update-snapshots"
+        fi
+
+        # Add reporter
+        if [ "${{ inputs.reporter }}" != "console" ]; then
+          CMD="$CMD --reporter ${{ inputs.reporter }}"
+          if [ -n "${{ inputs.report-output }}" ]; then
+            CMD="$CMD --report-output ${{ inputs.report-output }}"
+          fi
+        fi
+
+        echo "Running: $CMD"
+        echo ""
+
+        # Run and capture output
+        set +e
+        OUTPUT=$($CMD 2>&1)
+        EXIT_CODE=$?
+        set -e
+
+        echo "$OUTPUT"
+
+        # Parse results for JSON reporter
+        if [ "${{ inputs.reporter }}" = "json" ]; then
+          PASSED=$(echo "$OUTPUT" | jq -r '.passed // 0')
+          FAILED=$(echo "$OUTPUT" | jq -r '.failed // 0')
+          TOTAL=$(echo "$OUTPUT" | jq -r '.total // 0')
+          DURATION=$(echo "$OUTPUT" | jq -r '.duration // 0')
+
+          if [ "$TOTAL" -gt 0 ]; then
+            PASS_RATE=$((PASSED * 100 / TOTAL))
+          else
+            PASS_RATE=0
+          fi
+
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          echo "pass-rate=$PASS_RATE" >> $GITHUB_OUTPUT
+          echo "duration=$DURATION" >> $GITHUB_OUTPUT
+        fi
+
+        # Set report path if applicable
+        if [ -n "${{ inputs.report-output }}" ]; then
+          echo "report-path=${{ inputs.report-output }}" >> $GITHUB_OUTPUT
+        fi
+
+        exit $EXIT_CODE
+
+    - name: Upload Report Artifact
+      if: inputs.reporter != 'console' && inputs.report-output != ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: mcp-jest-report
+        path: ${{ inputs.report-output }}
+        retention-days: 30

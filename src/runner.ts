@@ -133,7 +133,7 @@ export class MCPTestRunner {
         : Object.keys(this.testConfig.tools);
       
       const availableTools = capabilities.tools?.map(t => t.name) || [];
-      
+
       for (const toolName of expectedTools) {
         if (!this.shouldRunTest(toolName)) {
           this.addResult({
@@ -144,20 +144,23 @@ export class MCPTestRunner {
           });
           continue;
         }
-        
-        if (availableTools.includes(toolName)) {
+
+        // Extract base tool name for lookup (handle test suffixes like "calculate:missing-expression")
+        const baseToolName = toolName.includes(':') ? toolName.split(':')[0] : toolName;
+
+        if (availableTools.includes(baseToolName)) {
           this.addResult({
             name: `Tool '${toolName}' exists`,
             type: 'capability',
             status: 'pass',
-            message: `Tool '${toolName}' is available`
+            message: `Tool '${baseToolName}' is available`
           });
         } else {
           this.addResult({
             name: `Tool '${toolName}' exists`,
             type: 'capability',
             status: 'fail',
-            message: `Expected tool '${toolName}' not found. Available tools: ${availableTools.join(', ')}`
+            message: `Expected tool '${baseToolName}' not found. Available tools: ${availableTools.join(', ')}`
           });
         }
       }
@@ -266,9 +269,12 @@ export class MCPTestRunner {
 
   private async testTool(name: string, config: ToolTestConfig): Promise<void> {
     const startTime = Date.now();
-    
+
+    // Extract actual tool name (handle test suffixes like "calculate:missing-expression")
+    const actualToolName = name.includes(':') ? name.split(':')[0] : name;
+
     try {
-      const result = await this.client.callTool(name, config.args || {});
+      const result = await this.client.callTool(actualToolName, config.args || {});
       
       // Handle snapshot testing
       if (config.snapshot) {
@@ -309,10 +315,20 @@ export class MCPTestRunner {
       
       // Validate result if expectation provided
       if (config.expect) {
-        const isValid = typeof config.expect === 'function' 
+        // Debug logging for development
+        if (process.env.MCP_JEST_DEBUG) {
+          console.error(`[DEBUG] Tool '${name}' result:`, JSON.stringify(result, null, 2));
+          console.error(`[DEBUG] Expectation: ${config.expect}`);
+        }
+
+        const isValid = typeof config.expect === 'function'
           ? config.expect(result)
           : this.evaluateExpectation(result, config.expect);
-        
+
+        if (process.env.MCP_JEST_DEBUG) {
+          console.error(`[DEBUG] Evaluation result: ${isValid}`);
+        }
+
         if (isValid) {
           this.addResult({
             name: `Tool '${name}' execution`,
@@ -696,7 +712,24 @@ export class MCPTestRunner {
       if (expectation === 'exists') {
         return value !== null && value !== undefined;
       }
-      
+
+      // Handle compound conditions with && first (before property access check)
+      if (expectation.includes('&&')) {
+        const parts = expectation.split('&&').map(part => part.trim());
+        return parts.every(part => {
+          if (part.includes('>') || part.includes('<') || part.includes('===') || part.includes('==')) {
+            return this.evaluatePropertyExpectation(value, part);
+          } else if (part.includes('.') || part.includes('[')) {
+            const propValue = this.getPropertyValue(value, part);
+            return Boolean(propValue);
+          } else {
+            // Simple property name at root level
+            const propValue = this.getPropertyValue(value, part);
+            return Boolean(propValue);
+          }
+        });
+      }
+
       // Check for property access patterns (e.g., "content[0].text === '8'")
       if (expectation.includes('.') || expectation.includes('[')) {
         return this.evaluatePropertyExpectation(value, expectation);

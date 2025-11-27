@@ -1,0 +1,37 @@
+{
+  "server": {
+    "command": "node",
+    "args": ["e2e/test-server.js"]
+  },
+  "tests": {
+    "tools": {
+      "calculate": {
+        "args": { "expression": "2 + 2" },
+        "expect": "content[0].text === '4'"
+      },
+      "echo": {
+        "args": { "message": "Hello, World!" },
+        "expect": "content[0].text === 'Hello, World!'"
+      },
+      "greet": {
+        "args": { "name": "Alice" },
+        "expect": "content[0].text === 'Hello, Alice!'"
+      }
+    },
+    "resources": {
+      "config://settings": {
+        "expect": "exists"
+      },
+      "data://users": {
+        "expect": "exists"
+      }
+    },
+    "prompts": {
+      "code-review": {
+        "args": { "language": "javascript", "code": "function test() {}" },
+        "expect": "exists"
+      }
+    },
+    "timeout": 30000
+  }
+}

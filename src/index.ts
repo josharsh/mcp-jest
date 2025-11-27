@@ -5,6 +5,11 @@ export * from './types.js';
 export { MCPTestClient } from './client.js';
 export { MCPTestRunner } from './runner.js';
 export { SnapshotManager } from './snapshot.js';
+export { MCPDiscovery, formatAsTestFile, formatAsJson } from './discovery.js';
+export type { DiscoveryOptions, DiscoveryResult } from './discovery.js';
+export { MCPProtocolValidator, type ProtocolValidationResult, type ComplianceReport } from './validator.js';
+export { WatchMode, type WatchOptions } from './watch.js';
+export { HTMLReporter, type ReporterOptions } from './reporter.js';
 
 /**
  * Test an MCP server with the given configuration

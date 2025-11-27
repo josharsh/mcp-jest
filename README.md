@@ -131,6 +131,36 @@ Describe *what* to test, not *how*. Focus on your server logic, not test infrast
 - **Graceful Error Handling**: Handle "Method not found" errors elegantly
 - **Flexible Servers**: Test servers that only implement some capabilities
 
+### 🔍 **Auto-Discovery & Test Generation** (NEW v1.2.0!)
+- **Zero-Config Testing**: Automatically discover all tools, resources, and prompts
+- **Smart Test Generation**: Generate test configurations based on schema analysis
+- **Intelligent Defaults**: Auto-generate sensible test arguments from parameter schemas
+- **Export Formats**: Output as JSON config or TypeScript test file
+
+### ✅ **Protocol Compliance Validator** (NEW v1.2.0!)
+- **MCP Compliance Scoring**: Get a compliance score for your server
+- **Detailed Reports**: See exactly which protocol requirements are met
+- **Best Practice Checks**: Validate naming conventions, descriptions, and more
+- **Exportable Results**: JSON reports for CI/CD integration
+
+### 👁️ **Watch Mode** (NEW v1.2.0!)
+- **Auto-Rerun Tests**: Automatically rerun tests when files change
+- **Smart Detection**: Watch server files and test configs
+- **Fast Feedback**: Instant results during development
+- **Configurable Paths**: Specify which directories to watch
+
+### 📊 **HTML Reporter** (NEW v1.2.0!)
+- **Beautiful Reports**: Generate interactive HTML test reports
+- **Dark/Light Theme**: Automatic theme support
+- **Detailed Results**: Expandable sections for each test
+- **Shareable**: Single HTML file with embedded styles
+
+### 🤖 **GitHub Action** (NEW v1.2.0!)
+- **Native CI/CD**: First-class GitHub Actions integration
+- **Flexible Configuration**: Support all CLI options as inputs
+- **Multiple Transports**: Test stdio, HTTP, and SSE servers
+- **Auto-Discovery Mode**: Run tests without manual configuration
+
 ---
 
 ## 🎯 Real-World Examples
@@ -238,7 +268,107 @@ EOF
 mcp-jest --config mcp-jest.json
 ```
 
+### Auto-Discovery (NEW v1.2.0!)
+```bash
+# Discover all capabilities and generate test config
+mcp-jest discover node ./server.js
+
+# Output as JSON file
+mcp-jest discover node ./server.js --output tests.json
+
+# Output as TypeScript test file
+mcp-jest discover node ./server.js --output tests.ts
+
+# Discover from HTTP server
+mcp-jest discover --transport streamable-http --url http://localhost:3000
+```
+
+### Protocol Validation (NEW v1.2.0!)
+```bash
+# Validate MCP protocol compliance
+mcp-jest validate node ./server.js
+
+# Validate with detailed output
+mcp-jest validate node ./server.js --depth full
+
+# Export compliance report as JSON
+mcp-jest validate node ./server.js --output compliance.json
+```
+
+### Watch Mode (NEW v1.2.0!)
+```bash
+# Watch for changes and rerun tests
+mcp-jest watch node ./server.js --tools search,email
+
+# Watch specific directories
+mcp-jest watch node ./server.js --watch-paths src,lib --tools search
+
+# Watch with config file
+mcp-jest watch --config mcp-jest.json
+```
+
+### HTML Reports (NEW v1.2.0!)
+```bash
+# Generate HTML test report
+mcp-jest node ./server.js --tools search --reporter html
+
+# Specify output file
+mcp-jest node ./server.js --tools search --reporter html --report-output report.html
+
+# Combine with other options
+mcp-jest --config test.json --reporter html --report-output ./reports/latest.html
+```
+
+### GitHub Action (NEW v1.2.0!)
+```yaml
+# .github/workflows/mcp-test.yml
+name: MCP Server Tests
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Test MCP Server
+        uses: josharsh/mcp-jest@v1
+        with:
+          server-command: 'node'
+          server-args: 'dist/server.js'
+          tools: 'search,calculate,email'
+          reporter: 'html'
+          report-output: 'test-report.html'
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: test-report.html
+```
+
 ## 📖 CLI Reference
+
+### Commands
+
+```bash
+mcp-jest [command] [OPTIONS] [SERVER_COMMAND]
+```
+
+#### Available Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| (default) | Run tests against MCP server | `mcp-jest node ./server.js --tools search` |
+| `discover` | Auto-discover capabilities and generate tests | `mcp-jest discover node ./server.js` |
+| `validate` | Validate MCP protocol compliance | `mcp-jest validate node ./server.js` |
+| `watch` | Watch for changes and rerun tests | `mcp-jest watch node ./server.js --tools search` |
 
 ### Command Line Options
 
@@ -246,7 +376,7 @@ mcp-jest --config mcp-jest.json
 mcp-jest [OPTIONS] [SERVER_COMMAND]
 ```
 
-#### Options
+#### Core Options
 
 | Option | Description | Example |
 |--------|-------------|---------|
@@ -264,6 +394,32 @@ mcp-jest [OPTIONS] [SERVER_COMMAND]
 | `-u, --update-snapshots` | Update snapshots instead of comparing | `mcp-jest -u` |
 | `-f, --filter <pattern>` | Run only tests matching pattern | `mcp-jest --filter "search*"` |
 | `--skip <pattern>` | Skip tests matching pattern | `mcp-jest --skip "*test*"` |
+
+#### Reporter Options (NEW v1.2.0!)
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--reporter <type>` | Output format: console, html, json | `mcp-jest --reporter html` |
+| `--report-output <file>` | Output file for report | `mcp-jest --report-output report.html` |
+
+#### Discovery Options (NEW v1.2.0!)
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--output <file>` | Output file for discovered tests (.json or .ts) | `mcp-jest discover --output tests.json` |
+
+#### Validation Options (NEW v1.2.0!)
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--depth <level>` | Validation depth: basic, standard, full | `mcp-jest validate --depth full` |
+| `--output <file>` | Output file for compliance report | `mcp-jest validate --output compliance.json` |
+
+#### Watch Options (NEW v1.2.0!)
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--watch-paths <paths>` | Comma-separated directories to watch | `mcp-jest watch --watch-paths src,lib` |
 
 ## 🚀 Ecosystem Integration
 
@@ -313,7 +469,7 @@ With MCP-JEST: Automated, repeatable, confident testing
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              MCP-JEST Architecture                          │
+│                        MCP-JEST Architecture v1.2.0                         │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐                    │
@@ -323,11 +479,13 @@ With MCP-JEST: Automated, repeatable, confident testing
 │         │                    │                    │                         │
 │         └────────────────────┴────────────────────┘                         │
 │                              │                                              │
-│                              ▼                                              │
-│                    ┌─────────────────┐                                      │
-│                    │   MCPTestRunner  │                                     │
-│                    │   (runner.ts)    │                                     │
-│                    └────────┬─────────┘                                     │
+│    ┌─────────────────────────┼─────────────────────────┐                    │
+│    │                         │                         │                    │
+│    ▼                         ▼                         ▼                    │
+│  ┌──────────────┐  ┌─────────────────┐  ┌──────────────────┐                │
+│  │ MCPDiscovery │  │  MCPTestRunner  │  │ MCPProtocolValid │                │
+│  │(discovery.ts)│  │   (runner.ts)   │  │  (validator.ts)  │                │
+│  └──────────────┘  └────────┬────────┘  └──────────────────┘                │
 │                             │                                               │
 │         ┌───────────────────┼───────────────────┐                           │
 │         │                   │                   │                           │
@@ -342,6 +500,11 @@ With MCP-JEST: Automated, repeatable, confident testing
 │  │          MCP Protocol Communication              │                       │
 │  │        (via @modelcontextprotocol/sdk)          │                        │
 │  └──────────────────────────────────────────────────┘                       │
+│                             │                                               │
+│  ┌──────────────┐  ┌───────────────┐  ┌──────────────┐                      │
+│  │  WatchMode   │  │  HTMLReporter │  │ GitHub Action│   (NEW v1.2.0)       │
+│  │ (watch.ts)   │  │ (reporter.ts) │  │ (action.yml) │                      │
+│  └──────────────┘  └───────────────┘  └──────────────┘                      │
 │                             │                                               │
 └─────────────────────────────┼──────────────────────────────────────────────┘
                               │
@@ -530,23 +693,28 @@ With MCP-JEST: Automated, repeatable, confident testing
 ### Feature Comparison Matrix
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Feature Comparison                        │
-├─────────────────┬──────────┬─────────┬──────────┬──────────  ┤
-│     Feature      │ MCP-JEST │ Manual  │ Custom   │ Generic   │
-│                  │          │ Testing │ Scripts  │ Frameworks│
-├─────────────────┼──────────┼─────────┼──────────┼────────────┤
-│ Process Mgmt     │    ✓     │    ✗    │    ~     │    ✗      │
-│ MCP Protocol     │    ✓     │    ✓    │    ~     │    ✗      │
-│ Auto Discovery   │    ✓     │    ✗    │    ~     │    ✗      │
-│ Snapshots        │    ✓     │    ✗    │    ~     │    ~      │
-│ CI/CD Ready      │    ✓     │    ✗    │    ~     │    ✓      │
-│ Type Safety      │    ✓     │    ✗    │    ~     │    ~      │
-│ Zero Config      │    ✓     │    ✓    │    ✗     │    ✗      │
-│ Timing Info      │    ✓     │    ✗    │    ~     │    ✓      │
-│ Expectations     │    ✓     │    ✗    │    ~     │    ✓      │
-│ JSON Reports     │    ✓     │    ✗    │    ~     │    ~      │
-└─────────────────┴──────────┴─────────┴──────────┴──────────┘
+┌───────────────────────────────────────────────────────────────────┐
+│                    Feature Comparison                             │
+├───────────────────┬──────────┬─────────┬──────────┬──────────────┤
+│     Feature       │ MCP-JEST │ Manual  │ Custom   │ Generic      │
+│                   │          │ Testing │ Scripts  │ Frameworks   │
+├───────────────────┼──────────┼─────────┼──────────┼──────────────┤
+│ Process Mgmt      │    ✓     │    ✗    │    ~     │    ✗         │
+│ MCP Protocol      │    ✓     │    ✓    │    ~     │    ✗         │
+│ Auto Discovery    │    ✓     │    ✗    │    ~     │    ✗         │
+│ Test Generation   │    ✓     │    ✗    │    ✗     │    ✗         │ NEW
+│ Protocol Validate │    ✓     │    ✗    │    ✗     │    ✗         │ NEW
+│ Watch Mode        │    ✓     │    ✗    │    ~     │    ✓         │ NEW
+│ HTML Reports      │    ✓     │    ✗    │    ~     │    ✓         │ NEW
+│ GitHub Action     │    ✓     │    ✗    │    ✗     │    ~         │ NEW
+│ Snapshots         │    ✓     │    ✗    │    ~     │    ~         │
+│ CI/CD Ready       │    ✓     │    ✗    │    ~     │    ✓         │
+│ Type Safety       │    ✓     │    ✗    │    ~     │    ~         │
+│ Zero Config       │    ✓     │    ✓    │    ✗     │    ✗         │
+│ Timing Info       │    ✓     │    ✗    │    ~     │    ✓         │
+│ Expectations      │    ✓     │    ✗    │    ~     │    ✓         │
+│ JSON Reports      │    ✓     │    ✗    │    ~     │    ~         │
+└───────────────────┴──────────┴─────────┴──────────┴──────────────┘
 
 Legend: ✓ Full Support, ~ Partial/Manual Implementation, ✗ Not Supported
 ```
