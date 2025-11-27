@@ -1,173 +1,114 @@
-# mcp-jest: Jest for MCP Servers
+# MCP-Jest Documentation
 
-> **Automated testing for Model Context Protocol servers. Ship with confidence.**
+Welcome to the MCP-Jest documentation. This guide will help you test your MCP servers with confidence.
 
-[![npm version](https://badge.fury.io/js/mcp-jest.svg)](https://www.npmjs.com/package/mcp-jest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+## Quick Links
 
-## The Problem
+| I want to... | Go to |
+|--------------|-------|
+| Get started quickly | [Getting Started](guides/getting-started.md) |
+| See all CLI options | [CLI Reference](cli-reference.md) |
+| Use the library API | [API Reference](api/README.md) |
+| See code examples | [Examples](examples/README.md) |
+| Set up CI/CD | [GitHub Actions](guides/github-actions.md) |
+| Fix an issue | [Troubleshooting](guides/troubleshooting.md) |
 
-You built an MCP server that connects AI assistants to your database, file system, or API. But how do you know it actually works?
+## Documentation Structure
 
-**Before mcp-jest:**
-- ❌ Manual testing for every change
-- ❌ "Hope it works in production" deployments  
-- ❌ Silent failures that break AI workflows
-- ❌ No CI/CD integration for MCP servers
+### Core Documentation
 
-**After mcp-jest:**
-- ✅ Automated testing in seconds
-- ✅ Confident deployments
-- ✅ Catch issues before users do
-- ✅ Full CI/CD integration
+- **[CLI Reference](cli-reference.md)** - Complete command-line interface documentation
+- **[API Reference](api/README.md)** - Library API for programmatic usage
+- **[Architecture](architecture.md)** - How MCP-Jest works internally
+- **[Comparison](comparison.md)** - MCP-Jest vs other testing approaches
 
-## Quick Example
+### Guides
 
-```javascript
-import { mcpTest } from 'mcp-jest';
+- **[Getting Started](guides/getting-started.md)** - Step-by-step setup guide
+- **[Snapshot Testing](guides/snapshot-testing.md)** - Capture and compare outputs
+- **[HTTP Transport](guides/http-transport.md)** - Test HTTP/SSE servers
+- **[GitHub Actions](guides/github-actions.md)** - CI/CD integration
+- **[Watch Mode](guides/watch-mode.md)** - Auto-rerun tests on changes
+- **[Troubleshooting](guides/troubleshooting.md)** - Common issues and solutions
 
-// Test your MCP server automatically
-const results = await mcpTest(
-  { command: 'node', args: ['./my-server.js'] },
-  {
-    tools: {
-      calculate: { 
-        args: { a: 5, b: 3 }, 
-        expect: result => result.content[0].text === '8' 
-      },
-      sendEmail: {
-        args: { to: 'test@example.com', subject: 'Test' },
-        expect: 'messageId exists'
-      }
-    },
-    resources: {
-      'config.json': { expect: 'exists' },
-      'docs/*': { expect: 'count >= 1' }
-    }
-  }
-);
+### Examples
 
-console.log(`✅ ${results.passed}/${results.total} tests passed`);
-```
-
-## Real-World Value
-
-### 🚀 **Development Velocity**
-Stop manually testing every change. Run `mcp-jest` and know instantly if your server works.
-
-### 🛡️ **Production Confidence** 
-Deploy knowing your MCP server actually responds to tools, serves resources, and handles edge cases.
-
-### 🔄 **CI/CD Integration**
-```bash
-# In your GitHub Actions
-- name: Test MCP Server
-  run: mcp-jest node ./server.js --tools "search,email" --resources "docs/*"
-```
-
-### 🐛 **Regression Prevention**
-Catch breaking changes before they reach production. Perfect for teams building complex MCP ecosystems.
+- **[Examples](examples/README.md)** - Real-world test configurations
 
 ## Installation
 
 ```bash
-# As a library
-npm install mcp-jest
-
-# Global CLI tool  
+# Global CLI
 npm install -g mcp-jest
+
+# Local dependency
+npm install mcp-jest
 ```
 
-## Use Cases
+## Quick Example
 
-| Scenario | Without MCP-Test | With MCP-Test |
-|----------|------------------|---------------|
-| **New Feature** | Manual client connection testing | `mcp-jest --tools newFeature` |
-| **Deployment** | Cross fingers and deploy | Automated test suite in CI |
-| **Team Collaboration** | "It works on my machine" | Shared test specifications |
-| **Debugging** | Unclear what's broken | Detailed test failure reports |
-
-## CLI Usage
+### CLI
 
 ```bash
-# Test specific tools
-mcp-jest node ./server.js --tools "search,calculate"
-
-# Test everything with config file
-mcp-jest --config ./mcp-jest.json
-
-# Quick smoke test
-mcp-jest python server.py --tools "health"
+mcp-jest node ./server.js --tools search,email
 ```
 
-## Library Usage
+### Library
 
 ```javascript
-import { mcpTest, formatResults } from 'mcp-jest';
+import { mcpTest } from 'mcp-jest';
 
-// Comprehensive testing
-const results = await mcpTest(serverConfig, {
-  tools: {
-    userAuth: { args: { token: 'test' }, expect: 'success === true' },
-    dataQuery: { args: { table: 'users' }, expect: 'results.length > 0' }
-  },
-  resources: {
-    'schema.sql': { expect: 'exists' },
-    'migrations/*': { expect: 'count >= 5' }
-  },
-  prompts: {
-    'code-review': { expect: 'messages.length > 0' }
-  },
-  timeout: 30000
-});
+const results = await mcpTest(
+  { command: 'node', args: ['./server.js'] },
+  { tools: ['search', 'email'] }
+);
 
-if (results.passed === results.total) {
-  console.log('🎉 All tests passed! Ready to deploy.');
-} else {
-  console.error(formatResults(results));
-  process.exit(1);
+console.log(`${results.passed}/${results.total} tests passed`);
+```
+
+### Config File
+
+```json
+{
+  "server": {
+    "command": "node",
+    "args": ["./server.js"]
+  },
+  "tests": {
+    "tools": {
+      "search": {
+        "args": { "query": "test" },
+        "expect": "content.length > 0"
+      }
+    }
+  }
 }
 ```
 
-## Why MCP-Test?
+```bash
+mcp-jest --config mcp-jest.json
+```
 
-### **Simple API**
-One function call tests your entire server. No complex setup or configuration.
+## Features Overview
 
-### **Comprehensive Coverage**
-- ✅ Connection testing
-- ✅ Tool execution validation  
-- ✅ Resource accessibility checks
-- ✅ Prompt generation verification
+| Feature | Description |
+|---------|-------------|
+| **Automated Testing** | Test tools, resources, and prompts automatically |
+| **Snapshot Testing** | Capture and compare MCP outputs |
+| **Test Filtering** | Run specific tests with `--filter` and `--skip` |
+| **Watch Mode** | Auto-rerun tests when files change |
+| **HTML Reports** | Generate shareable test reports |
+| **Auto-Discovery** | Discover all server capabilities |
+| **Protocol Validation** | Check MCP compliance |
+| **HTTP Transport** | Test remote HTTP/SSE servers |
+| **GitHub Action** | Native CI/CD integration |
 
-### **Developer Experience**
-- 🎯 Clear test failures with context
-- 📊 Pretty-printed results
-- 🔧 TypeScript support
-- ⚡ Fast execution (typically < 500ms)
+## Getting Help
 
-### **Production Ready**
-- 🔒 Secure server spawning
-- 🧹 Automatic cleanup
-- 🔄 Retry logic for flaky servers
-- 📈 Detailed reporting
+- **[GitHub Issues](https://github.com/josharsh/mcp-jest/issues)** - Bug reports
+- **[GitHub Discussions](https://github.com/josharsh/mcp-jest/discussions)** - Questions
+- **[Troubleshooting](guides/troubleshooting.md)** - Common issues
 
-## Perfect For
+## Contributing
 
-- **MCP Server Developers** - Test your implementations thoroughly
-- **AI Application Teams** - Ensure your MCP integrations work
-- **DevOps Engineers** - Add MCP testing to CI/CD pipelines  
-- **QA Teams** - Automated testing for AI tool ecosystems
-
-## Get Started
-
-1. **Install**: `npm install mcp-jest`
-2. **Test**: `mcp-jest node ./your-server.js --tools "your-tool"`
-3. **Integrate**: Add to your CI/CD pipeline
-4. **Ship**: Deploy with confidence
-
----
-
-**mcp-jest**: Because AI tools should work reliably, every time.
-
-[📖 Full Documentation](./MCP-Test%20Framework%20Documentation.md) | [🐛 Issues](https://github.com/your-repo/mcp-jest/issues) | [💬 Discussions](https://github.com/your-repo/mcp-jest/discussions)
+See the [Contributing Guide](../CONTRIBUTING.md) for information on how to contribute to MCP-Jest.
