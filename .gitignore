@@ -116,6 +116,11 @@ test-global*.js
 setup-git-history.sh
 preview-git-history.sh
 GIT_HISTORY_SETUP.md
+OPEN_SOURCE_STRATEGY.md
+
+# Generated files
+*.generated.json
+e2e/report-*
 
 # Editor directories and files
 .idea
