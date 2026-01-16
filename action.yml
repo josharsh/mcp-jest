@@ -1,5 +1,5 @@
-name: 'MCP-Jest Test'
-description: 'Test your MCP servers with mcp-jest - the Jest-like testing framework for Model Context Protocol'
+name: 'MCP-Jest Test Action'
+description: 'Test Model Context Protocol (MCP) servers with mcp-jest - automated testing framework for AI agent tools, LLM integrations, and MCP protocol compliance validation in CI/CD pipelines'
 author: 'Harsh Joshi'
 branding:
   icon: 'check-circle'

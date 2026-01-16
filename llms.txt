@@ -1,0 +1,61 @@
+# MCP-Jest
+
+> The testing framework for Model Context Protocol (MCP) servers. Like Jest, but for MCP. Test your MCP server tools, resources, and prompts with automated testing, snapshot testing, and CI/CD integration.
+
+MCP-Jest helps developers test their MCP servers that connect AI assistants (Claude, ChatGPT, etc.) to databases, file systems, or APIs. It provides automated, repeatable testing with Jest-like syntax.
+
+## Quick Start
+
+- [Getting Started Guide](/docs/guides/getting-started.md): Step-by-step setup guide
+- [CLI Reference](/docs/cli-reference.md): Complete CLI documentation
+- [API Reference](/docs/api/README.md): Library API documentation
+
+## Installation
+
+```bash
+npm install mcp-jest        # As dependency
+npm install -g mcp-jest     # Or globally for CLI
+```
+
+## Basic Usage
+
+```javascript
+import { mcpTest } from 'mcp-jest';
+
+const results = await mcpTest(
+  { command: 'node', args: ['./server.js'] },
+  { tools: ['search', 'email'] }
+);
+```
+
+Or via CLI:
+
+```bash
+mcp-jest node ./server.js --tools search,email
+```
+
+## Features
+
+- Automated Testing: Write tests once, run them everywhere
+- Comprehensive Coverage: Test connections, tools, resources, and prompts
+- Snapshot Testing: Capture and compare MCP outputs over time
+- CI/CD Ready: Works with GitHub Actions, Jenkins, CircleCI
+- Protocol Validator: Check MCP compliance with detailed scoring
+- Watch Mode: Auto-rerun tests when files change
+- HTML Reports: Generate beautiful, shareable test reports
+- Multiple Transports: stdio, HTTP Streaming, SSE support
+
+## Documentation
+
+- [Examples](/docs/examples/README.md): Real-world examples
+- [Architecture](/docs/architecture.md): How MCP-Jest works
+- [Snapshot Testing](/docs/guides/snapshot-testing.md): Snapshot testing guide
+- [HTTP Transport](/docs/guides/http-transport.md): HTTP transport guide
+- [GitHub Actions](/docs/guides/github-actions.md): CI/CD integration
+- [Troubleshooting](/docs/guides/troubleshooting.md): Common issues and solutions
+
+## Links
+
+- [GitHub Repository](https://github.com/josharsh/mcp-jest)
+- [npm Package](https://www.npmjs.com/package/mcp-jest)
+- [Issue Tracker](https://github.com/josharsh/mcp-jest/issues)

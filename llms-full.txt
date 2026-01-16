@@ -1,0 +1,505 @@
+# MCP-Jest
+
+> The testing framework for Model Context Protocol (MCP) servers. Like Jest, but for MCP. Test your MCP server tools, resources, and prompts with automated testing, snapshot testing, and CI/CD integration.
+
+MCP-Jest is an open-source testing framework designed specifically for testing Model Context Protocol (MCP) servers. MCP servers connect AI assistants like Claude, ChatGPT, and other LLMs to external tools, databases, file systems, and APIs. MCP-Jest provides automated, repeatable testing to ensure your MCP servers work correctly.
+
+## Why MCP-Jest?
+
+When you build an MCP server, you need to verify it actually works:
+- Manual testing for every change is time-consuming
+- Silent failures can break AI workflows
+- No native CI/CD integration exists for MCP servers
+- Debugging is difficult when things go wrong
+
+MCP-Jest solves this with automated, repeatable testing for your MCP servers.
+
+---
+
+## Installation
+
+```bash
+# As a dependency (recommended)
+npm install --save-dev mcp-jest
+
+# Or globally for CLI usage
+npm install -g mcp-jest
+
+# Using pnpm
+pnpm add -D mcp-jest
+
+# Using yarn
+yarn add -D mcp-jest
+```
+
+Requirements:
+- Node.js 18 or higher
+- An MCP server implementing the Model Context Protocol
+
+---
+
+## Quick Start
+
+### Programmatic Usage
+
+```javascript
+import { mcpTest, formatResults } from 'mcp-jest';
+
+const results = await mcpTest(
+  { command: 'node', args: ['./server.js'] },
+  { tools: ['search', 'email'] }
+);
+
+console.log(`${results.passed}/${results.total} tests passed`);
+```
+
+### CLI Usage
+
+```bash
+# Test specific tools
+mcp-jest node ./server.js --tools search,email
+
+# Test with config file
+mcp-jest --config mcp-jest.json
+
+# Auto-discover server capabilities
+mcp-jest discover node ./server.js
+
+# Validate protocol compliance
+mcp-jest validate node ./server.js
+
+# Watch mode
+mcp-jest watch node ./server.js --tools search
+```
+
+---
+
+## Core API
+
+### mcpTest(serverConfig, testConfig)
+
+The main testing function for MCP servers.
+
+#### Parameters
+
+**serverConfig** (MCPServerConfig):
+- `command` (string): Command to start the server (e.g., 'node', 'python')
+- `args` (string[]): Command arguments (e.g., ['./server.js'])
+- `env` (Record<string, string>): Optional environment variables
+
+**testConfig** (MCPTestConfig):
+- `name` (string): Test suite name
+- `timeout` (number): Global timeout in milliseconds (default: 30000)
+- `tools` (ToolTests): Tool test configurations
+- `resources` (ResourceTests): Resource test configurations
+- `prompts` (PromptTests): Prompt test configurations
+- `snapshot` (boolean | SnapshotConfig): Snapshot configuration
+
+#### Returns
+
+Promise<TestSuite> with:
+- `name` (string): Suite name
+- `passed` (number): Number of passed tests
+- `failed` (number): Number of failed tests
+- `total` (number): Total number of tests
+- `duration` (number): Total duration in ms
+- `results` (TestResult[]): Individual test results
+
+#### Example
+
+```javascript
+const results = await mcpTest({
+  command: 'node',
+  args: ['server.js']
+}, {
+  name: 'My MCP Server Tests',
+  tools: {
+    calculate: {
+      args: { a: 5, b: 3 },
+      expect: 'result === 8'
+    }
+  }
+});
+```
+
+---
+
+## TypeScript Types
+
+```typescript
+interface MCPServerConfig {
+  command: string;
+  args: string[];
+  env?: Record<string, string>;
+}
+
+interface MCPTestConfig {
+  name?: string;
+  timeout?: number;
+  tools?: ToolTests;
+  resources?: ResourceTests;
+  prompts?: PromptTests;
+  snapshot?: boolean | string | SnapshotConfig;
+}
+
+interface ToolTestConfig {
+  args?: Record<string, unknown>;
+  expect?: string;
+  snapshot?: boolean | SnapshotConfig;
+}
+
+interface ResourceTestConfig {
+  expect?: string;
+  count?: number;
+  snapshot?: boolean | SnapshotConfig;
+}
+
+interface PromptTestConfig {
+  args?: Record<string, unknown>;
+  expect?: string;
+  snapshot?: boolean | SnapshotConfig;
+}
+
+interface SnapshotConfig {
+  updateSnapshot?: boolean;
+  snapshotDir?: string;
+  include?: string[];
+  exclude?: string[];
+}
+
+interface TestResult {
+  name: string;
+  status: 'pass' | 'fail';
+  duration: number;
+  error?: string;
+  snapshot?: {
+    updated: boolean;
+    diff?: string;
+  };
+}
+
+interface TestSuite {
+  name: string;
+  passed: number;
+  failed: number;
+  total: number;
+  duration: number;
+  results: TestResult[];
+}
+```
+
+---
+
+## CLI Reference
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `mcp-jest node ./server.js --tools search` | Test specific tools |
+| `mcp-jest --config test.json` | Use config file |
+| `mcp-jest discover node ./server.js` | Auto-discover capabilities |
+| `mcp-jest validate node ./server.js` | Check protocol compliance |
+| `mcp-jest watch node ./server.js --tools search` | Watch mode |
+
+### Options
+
+| Option | Alias | Description | Default |
+|--------|-------|-------------|---------|
+| `--help` | `-h` | Show help message | - |
+| `--version` | `-v` | Show version | - |
+| `--config <file>` | `-c` | Load configuration from JSON file | - |
+| `--server <cmd>` | `-s` | Server command (stdio only) | - |
+| `--timeout <ms>` | | Test timeout in milliseconds | `30000` |
+| `--tools <tools>` | `-t` | Comma-separated list of tools to test | - |
+| `--resources <res>` | `-r` | Comma-separated list of resources to test | - |
+| `--prompts <prompts>` | `-p` | Comma-separated list of prompts to test | - |
+| `--transport <type>` | | Transport: `stdio`, `sse`, `streamable-http` | `stdio` |
+| `--url <url>` | | Server URL (for HTTP transports) | - |
+| `--filter <pattern>` | `-f` | Run only tests matching pattern | - |
+| `--skip <pattern>` | | Skip tests matching pattern | - |
+| `--update-snapshots` | `-u` | Update snapshot files | - |
+| `--reporter <type>` | | Output: `console`, `html`, `json` | `console` |
+| `--report-output <file>` | | Output file for report | - |
+| `--depth <level>` | | Validation depth: `basic`, `standard`, `full` | `standard` |
+| `--watch-paths <paths>` | | Directories to watch | - |
+
+### Exit Codes
+
+| Code | Description |
+|------|-------------|
+| `0` | All tests passed |
+| `1` | One or more tests failed |
+| `2` | Configuration error |
+| `3` | Server startup failure |
+
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `DEBUG=mcp-jest*` | Enable debug logging |
+| `MCP_JEST_TIMEOUT` | Default timeout (ms) |
+
+---
+
+## Configuration File Format
+
+Create `mcp-jest.json`:
+
+```json
+{
+  "server": {
+    "command": "node",
+    "args": ["./server.js"],
+    "env": {
+      "NODE_ENV": "test"
+    }
+  },
+  "tests": {
+    "tools": {
+      "search": {
+        "args": { "query": "test" },
+        "expect": "content.length > 0"
+      },
+      "calculate": {
+        "args": { "a": 5, "b": 3 },
+        "expect": "content[0].text === '8'"
+      }
+    },
+    "resources": {
+      "config.json": { "expect": "exists" },
+      "docs/*": { "expect": "count >= 1" }
+    },
+    "prompts": {
+      "review-code": {
+        "args": { "code": "function test() {}" },
+        "expect": "messages.length > 0"
+      }
+    },
+    "timeout": 30000
+  }
+}
+```
+
+### HTTP Transport Config
+
+```json
+{
+  "server": {
+    "transport": "streamable-http",
+    "url": "http://localhost:3000/mcp"
+  },
+  "tests": {
+    "tools": ["search", "calculate"],
+    "timeout": 60000
+  }
+}
+```
+
+---
+
+## Features
+
+### Automated Testing
+Write tests once, run them everywhere. Test connections, tools, resources, and prompts.
+
+### Snapshot Testing
+Capture and compare MCP outputs over time. Useful for detecting unexpected changes.
+
+```javascript
+{
+  tools: {
+    getUserData: {
+      args: { userId: 123 },
+      snapshot: {
+        exclude: ["lastLogin", "sessionId"]
+      }
+    }
+  }
+}
+```
+
+### Test Filtering
+Run specific tests with `--filter` and skip tests with `--skip`.
+
+```bash
+mcp-jest node ./server.js --tools "search,email,weather" --filter search
+mcp-jest node ./server.js --tools "search,email" --skip email
+```
+
+### Watch Mode
+Auto-rerun tests when files change.
+
+```bash
+mcp-jest watch node ./server.js --tools search --watch-paths src,lib
+```
+
+### HTML Reports
+Generate beautiful, shareable test reports.
+
+```bash
+mcp-jest node ./server.js --tools search --reporter html --report-output report.html
+```
+
+### Protocol Validator
+Check MCP compliance with detailed scoring.
+
+```bash
+mcp-jest validate node ./server.js --depth full --output compliance.json
+```
+
+### Auto-Discovery
+Automatically discover and generate tests for all server capabilities.
+
+```bash
+mcp-jest discover node ./server.js --output mcp-jest.json
+```
+
+### Multiple Transport Support
+- **stdio** - Default transport for local servers
+- **HTTP Streaming** - Test remote HTTP servers
+- **SSE** - Server-Sent Events support
+
+---
+
+## Integration Examples
+
+### Jest Integration
+
+```javascript
+import { mcpTest } from 'mcp-jest';
+
+describe('MCP Server Tests', () => {
+  const serverConfig = { command: 'node', args: ['./server.js'] };
+
+  test('should connect and list capabilities', async () => {
+    const results = await mcpTest(serverConfig, {
+      tools: ['search', 'email']
+    });
+    expect(results.failed).toBe(0);
+  });
+
+  test('search tool should work correctly', async () => {
+    const results = await mcpTest(serverConfig, {
+      tools: {
+        search: {
+          args: { query: 'test' },
+          expect: (result) => result.content && result.content.length > 0
+        }
+      }
+    });
+    expect(results.failed).toBe(0);
+  });
+});
+```
+
+### GitHub Actions Integration
+
+```yaml
+name: Test MCP Server
+on: [push, pull_request]
+
+jobs:
+  test-mcp:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+    - run: npm ci
+    - run: npm run build
+    - run: npm install -g mcp-jest
+    - run: mcp-jest node ./dist/server.js --tools "search,email"
+```
+
+### Package.json Scripts
+
+```json
+{
+  "scripts": {
+    "test:mcp": "mcp-jest node ./server.js --tools search,email",
+    "test:mcp:full": "mcp-jest --config ./tests/mcp-jest.json",
+    "test:mcp:watch": "mcp-jest watch node ./server.js --tools search"
+  }
+}
+```
+
+---
+
+## Custom Expectations
+
+Use JavaScript expressions or functions for validation:
+
+```javascript
+// String expressions
+{
+  tools: {
+    search: {
+      args: { query: 'test' },
+      expect: 'content.length > 0 && content[0].text.includes("test")'
+    }
+  }
+}
+
+// Custom functions
+{
+  tools: {
+    getUserData: {
+      args: { userId: 123 },
+      expect: (result) => {
+        return result.user &&
+               result.user.id === 123 &&
+               result.user.email.includes('@');
+      }
+    }
+  }
+}
+```
+
+---
+
+## Troubleshooting
+
+### Server Won't Start
+```javascript
+// Use absolute paths
+const serverConfig = {
+  command: '/usr/bin/node',
+  args: ['./server.js']
+};
+
+// Or ensure PATH is set
+const serverConfig = {
+  command: 'node',
+  args: ['./server.js'],
+  env: { ...process.env }
+};
+```
+
+### Connection Timeout
+```javascript
+// Increase timeout
+const testConfig = {
+  tools: ['search'],
+  timeout: 60000
+};
+```
+
+### Debug Mode
+```bash
+DEBUG=mcp-jest* mcp-jest node ./server.js --tools search
+```
+
+---
+
+## Links
+
+- GitHub: https://github.com/josharsh/mcp-jest
+- npm: https://www.npmjs.com/package/mcp-jest
+- Issues: https://github.com/josharsh/mcp-jest/issues
+- MCP Specification: https://modelcontextprotocol.io
+
+## License
+
+MIT License - Use freely in commercial and open source projects.

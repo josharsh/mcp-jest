@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-labelledby="title desc">
+  <title id="title">MCP-Jest Logo</title>
+  <desc id="desc">Logo combining a hexagonal protocol frame with a glowing test core and verification checkmark.</desc>
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B1220"/>
+      <stop offset="100%" stop-color="#141F38"/>
+    </linearGradient>
+    <radialGradient id="core-gradient" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#4CF8FF" stop-opacity="0.9"/>
+      <stop offset="55%" stop-color="#2E9BFF" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#1A3F7A" stop-opacity="0.9"/>
+    </radialGradient>
+    <linearGradient id="stroke-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4CF8FF"/>
+      <stop offset="100%" stop-color="#2E7BFF"/>
+    </linearGradient>
+    <filter id="core-glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="240" height="240" rx="32" fill="url(#bg-gradient)"/>
+  <path d="M120 28 L199.6 74 L199.6 166 L120 212 L40.4 166 L40.4 74 Z" fill="none" stroke="url(#stroke-gradient)" stroke-width="6" stroke-linejoin="round"/>
+  <g stroke="#4CF8FF" stroke-width="4" fill="#14233F">
+    <circle cx="120" cy="28" r="8"/>
+    <circle cx="199.6" cy="74" r="8"/>
+    <circle cx="199.6" cy="166" r="8"/>
+    <circle cx="120" cy="212" r="8"/>
+    <circle cx="40.4" cy="166" r="8"/>
+    <circle cx="40.4" cy="74" r="8"/>
+  </g>
+  <circle cx="120" cy="120" r="62" fill="url(#core-gradient)" filter="url(#core-glow)"/>
+  <path d="M96 124 L112 140 L148 100" fill="none" stroke="#051B31" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M96 124 L112 140 L148 100" fill="none" stroke="#E8FBFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#E8FBFF" font-family="Inter, 'Segoe UI', system-ui, sans-serif" text-anchor="middle" letter-spacing="4">
+    <text x="120" y="226" font-size="16">MCP • JEST</text>
+  </g>
+</svg>

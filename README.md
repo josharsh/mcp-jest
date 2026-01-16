@@ -1,4 +1,4 @@
-# MCP-Jest
+# MCP-Jest - Testing Framework for Model Context Protocol Servers
 
 [![npm version](https://img.shields.io/npm/v/mcp-jest.svg)](https://www.npmjs.com/package/mcp-jest)
 [![npm downloads](https://img.shields.io/npm/dm/mcp-jest.svg)](https://www.npmjs.com/package/mcp-jest)
@@ -6,17 +6,24 @@
 [![Node.js CI](https://github.com/josharsh/mcp-jest/actions/workflows/ci.yml/badge.svg)](https://github.com/josharsh/mcp-jest/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
 
-**The testing framework for Model Context Protocol (MCP) servers - like Jest, but for MCP.**
+**The testing framework for Model Context Protocol (MCP) servers - like Jest, but for MCP. Test your AI agent tools, validate protocol compliance, and integrate with CI/CD pipelines.**
+
+MCP-Jest is an open-source testing tool for developers building MCP servers that connect AI assistants (Claude, ChatGPT, GPT-4, Gemini, LLMs) to external tools, databases, APIs, and file systems. Write automated tests for your MCP tools, resources, and prompts with Jest-like syntax.
+
+## What is MCP?
+
+[Model Context Protocol (MCP)](https://modelcontextprotocol.io) is an open standard introduced by Anthropic that allows AI assistants like Claude, ChatGPT, and other large language models (LLMs) to connect with external tools, data sources, and APIs. Think of it as a USB-C port for AI - a standardized way for AI to interact with the world.
 
 ## The Problem
 
 You built an MCP server that connects AI assistants to your database, file system, or API. But how do you know it actually works?
 
-- Manual testing for every change
-- Silent failures that break AI workflows
-- No CI/CD integration for MCP servers
-- Debugging nightmares when things go wrong
+- Manual testing for every change is slow and error-prone
+- Silent failures break AI workflows without warning
+- No native CI/CD integration exists for MCP servers
+- Debugging is difficult when tools fail in production
 
 **MCP-Jest solves this** with automated, repeatable testing for your MCP servers.
 
@@ -165,10 +172,37 @@ npm test
 
 See [SECURITY.md](SECURITY.md) for our security policy and vulnerability reporting.
 
+## Use Cases
+
+MCP-Jest is ideal for:
+
+- **MCP Server Developers** - Test your tools, resources, and prompts before deployment
+- **AI Application Teams** - Ensure your MCP integrations work correctly
+- **DevOps/SRE** - Add MCP server testing to CI/CD pipelines
+- **Open Source MCP Projects** - Provide reliable testing for community contributions
+
+## Comparison with Other Tools
+
+| Feature | MCP-Jest | Manual Testing | Generic Test Frameworks |
+|---------|----------|----------------|------------------------|
+| MCP Protocol Support | Native | Manual | Requires custom setup |
+| Auto-Discovery | Yes | No | No |
+| Snapshot Testing | Yes | No | Varies |
+| Protocol Validation | Yes | No | No |
+| CI/CD Integration | Built-in | Manual | Varies |
+
 ## Support
 
 - [GitHub Issues](https://github.com/josharsh/mcp-jest/issues) - Bug reports and feature requests
 - [GitHub Discussions](https://github.com/josharsh/mcp-jest/discussions) - Questions and ideas
+- [Model Context Protocol](https://modelcontextprotocol.io) - Official MCP documentation
+
+## Related Technologies
+
+- [Model Context Protocol (MCP)](https://modelcontextprotocol.io) - The protocol standard
+- [@modelcontextprotocol/sdk](https://www.npmjs.com/package/@modelcontextprotocol/sdk) - Official MCP SDK
+- [Claude](https://claude.ai) - Anthropic's AI assistant with MCP support
+- [Jest](https://jestjs.io) - JavaScript testing framework (inspiration for MCP-Jest)
 
 ## License
 
@@ -177,3 +211,7 @@ MIT License - Use freely in commercial and open source projects.
 ---
 
 **Built for the MCP ecosystem** | [Documentation](docs/) | [Examples](docs/examples/) | [Contributing](CONTRIBUTING.md)
+
+---
+
+<sub>Keywords: mcp testing, model context protocol testing, mcp server testing, ai agent testing, llm testing, claude mcp, chatgpt mcp, mcp tools testing, mcp validator, anthropic mcp, test mcp server, mcp ci cd, automated mcp testing</sub>

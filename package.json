@@ -17,7 +17,9 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "llms.txt",
+    "llms-full.txt"
   ],
   "scripts": {
     "build": "tsup src/index.ts src/cli.ts --format esm,cjs --dts",
@@ -32,11 +34,34 @@
   "keywords": [
     "mcp",
     "model-context-protocol",
+    "mcp-server",
+    "mcp-testing",
+    "mcp-server-testing",
     "testing",
+    "test-framework",
+    "testing-framework",
     "ai",
     "llm",
-    "framework",
-    "anthropic"
+    "ai-testing",
+    "llm-testing",
+    "anthropic",
+    "claude",
+    "chatgpt",
+    "openai",
+    "mcp-client",
+    "mcp-tools",
+    "mcp-validator",
+    "protocol-testing",
+    "integration-testing",
+    "automated-testing",
+    "ci-cd",
+    "devtools",
+    "developer-tools",
+    "jest",
+    "vitest",
+    "snapshot-testing",
+    "test-runner",
+    "mcp-sdk"
   ],
   "engines": {
     "node": ">=18"
