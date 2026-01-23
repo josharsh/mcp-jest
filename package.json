@@ -1,6 +1,6 @@
 {
   "name": "mcp-jest",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Testing framework for Model Context Protocol (MCP) servers - like Jest but for MCP",
   "type": "module",
   "main": "dist/index.js",
